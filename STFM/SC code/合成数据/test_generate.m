@@ -1,0 +1,54 @@
+clear;
+clc;
+close all;
+[data, omega] = generate_data(400,0.7,0.05);
+idx0 = data.cids;
+nbcluster = length(unique(idx0));
+X_c = data.Xs;
+n = length(X_c);
+acci_0 = [];
+acci_1 = [];
+acci_2 = [];
+acci_3 = [];
+NMI0 = [];
+NMI1 = [];
+NMI2 = [];
+NMI3 = [];
+t_0 = [];
+t_1 = [];
+t_2 = [];
+t_3 = [];
+for i = 1:n
+    Xi = X_c{1,i};
+    [L_irfllrr,~,~,~,~, T_irfllrr]=solve_irfllrr(Xi,omega,1, 0.4 ,0.93, 3); 
+    [L_LADMAP,~,T_LADMAP] =  LADMAP(Xi,omega, 0.001, 0.1);
+    [~, ~, L_FGLRR, T_FGLRR] = FGLRR(Xi,omega,0.001, 1, 2);
+    [~,~,~,L_MTFsp,T_MTFsp,~]=STFM(Xi,omega, 1e-4, 0.1, 2);
+    
+    idx_0 = clu_ncut(L_irfllrr,nbcluster);
+    idx_1 = clu_ncut(L_LADMAP,nbcluster); 
+    idx_2 = clu_ncut(L_FGLRR,nbcluster);
+    idx_3 = clu_ncut(L_MTFsp,nbcluster);
+    acci_0 = [acci_0; compacc(idx_0,idx0)];
+    acci_1 =[acci_1;compacc(idx_1,idx0)];
+    acci_2 = [acci_2;compacc(idx_2,idx0)];
+    acci_3 = [acci_3;compacc(idx_3,idx0)];
+    acc0=mean(acci_0);
+    acc1=mean(acci_1);
+    acc2=mean(acci_2);
+    acc3=mean(acci_3);
+    NMI0=[NMI0; NMI(idx_0,idx0)];
+    NMI1=[NMI1; NMI(idx_1,idx0)];
+    NMI2=[NMI2; NMI(idx_2,idx0)];
+    NMI3=[NMI3; NMI(idx_3,idx0)];
+    NMI_0=mean(NMI0);
+    NMI_1=mean(NMI1);
+    NMI_2=mean(NMI2);
+    NMI_3=mean(NMI3);
+    NMI_800_2=[NMI_0;NMI_1;NMI_2;NMI_3];
+    t_0 = [t_0; T_irfllrr];
+    t_1 = [t_1;T_LADMAP];
+    t_2 = [t_2;T_FGLRR];
+    t_3 = [t_3;T_MTFsp];
+end
+    
